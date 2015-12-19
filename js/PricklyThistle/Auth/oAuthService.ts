@@ -6,7 +6,9 @@ module PricklyThistle.Auth {
 
     export class OAuthService {
 
-        constructor( private $http : ng.IHttpService ) {
+        static $inject = [ "$http" ];
+
+        constructor( private _http : ng.IHttpService ) {
             alert( "Hello World from service" );
         }
     }

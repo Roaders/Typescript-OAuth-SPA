@@ -6,7 +6,9 @@ module PricklyThistle.Example {
 
     export class ExampleController {
 
-        constructor( OAuthService : OAuthService ) {
+        static $inject = [ "OAuthService" ];
+
+        constructor( private _oAuthService : OAuthService ) {
             alert( "Example Controller constructor" );
         }
 
