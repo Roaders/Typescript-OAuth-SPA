@@ -1,0 +1,11 @@
+{
+  "name": "OAuthClient",
+  "version": "1.0.0",
+  "description": "A Client for OAuth authentication in a SPA",
+  "main": "app.js",
+  "author": "Giles Roadnight",
+  "license": "ISC",
+  "dependencies": {
+    "angular": "^1.4.8"
+  }
+}
