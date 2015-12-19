@@ -8,7 +8,7 @@ Once you have done this build the app as follows:
 
 ```bash
 installDependencies
-#( this will call npm to install node_modules and call tsd to install Typescript Declartion files)
+#( this will call npm to install node_modules and call tsd to install Typescript Declaration files)
 
 compileApp
 #(this will use node to compile the typescript files to javascript)
