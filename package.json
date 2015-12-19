@@ -6,6 +6,7 @@
   "author": "Giles Roadnight",
   "license": "ISC",
   "dependencies": {
-    "angular": "^1.4.8"
+    "angular": "^1.4.8",
+    "tsd": "^0.6.5"
   }
 }
