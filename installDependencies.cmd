@@ -1,5 +1,5 @@
 
-@echo off
+@echo offtsd
 
 echo Installing NPM dependencies...
 call npm install
