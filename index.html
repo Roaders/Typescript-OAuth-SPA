@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>Outh Client Example</title>
 
+    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <script src="node_modules/angular/angular.js"></script>
 
     <script src="js/app.js"></script>
@@ -11,11 +13,12 @@
 </head>
 <body>
 
-<h1>Testing</h1>
-
 <div ng-controller="exampleController as controller">
-    Text from controller:
-    {{controller.message}}
+
+    <H2>Google</H2>
+
+    <button ng-click="controller.authenticate()">Authenticate With Google</button>
+
 </div>
 
 </body>

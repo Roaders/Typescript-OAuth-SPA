@@ -1,4 +1,5 @@
 /// <reference path="../Auth/oAuthService.ts" />
+/// <reference path="googleConstants.ts" />
 
 module PricklyThistle.Example {
 
@@ -8,11 +9,17 @@ module PricklyThistle.Example {
 
         static $inject = [ "OAuthService" ];
 
+        //  Constructor
+
         constructor( private _oAuthService : OAuthService ) {
-            alert( "Example Controller constructor" );
         }
 
-        message : String = "Hello World from controller";
+        //  Public Functions
+
+        authenticate() : void
+        {
+            this._oAuthService.authorise( Example.googleAuthDetails );
+        }
 
     }
 }
