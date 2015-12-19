@@ -35,7 +35,7 @@ module PricklyThistle.Auth {
 
             console.log( "Making request to " + requestDetails.requestUrl );
 
-            this._window.open( url, "_blank", "width=500,height=800" );
+            this._window.open( url, "_blank", "width=500,height=600" );
         }
 
         //  Private Functions
