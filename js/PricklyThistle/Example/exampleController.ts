@@ -6,12 +6,11 @@ module PricklyThistle.Example {
 
     export class ExampleController {
 
-        constructor() {
+        constructor( OAuthService : OAuthService ) {
             alert( "Example Controller constructor" );
         }
 
         message : String = "Hello World from controller";
 
     }
-
 }
