@@ -10,11 +10,13 @@ module PricklyThistle.Example {
     const clientId : string = "enterYourOwnClientID";
     const requestUrl : string = "https://accounts.google.com/o/oauth2/v2/auth?response_type=token&scope=profile";
     const redirectUrl : string = "http://localhost:63342/OAuthClient/index.html";
+    const tokenValidationUrl : string = "https://www.googleapis.com/oauth2/v3/tokeninfo";
 
     export var googleAuthDetails : IRequestDetails = {
         client_id : clientId,
+        redirect_uri : redirectUrl,
         requestUrl : requestUrl,
-        redirect_uri : redirectUrl
+        validationUrl : tokenValidationUrl
     }
 
 }
