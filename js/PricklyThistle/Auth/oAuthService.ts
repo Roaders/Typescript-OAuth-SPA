@@ -14,7 +14,11 @@ module PricklyThistle.Auth {
         validationUrl : string
     }
 
-    interface IAccessTokenResponse {
+    interface IResponse {
+        state : string
+    }
+
+    interface IAccessTokenResponse extends IResponse{
         access_token : string,
         expires_in : string,
         token_type : string
@@ -34,6 +38,7 @@ module PricklyThistle.Auth {
         static instanceCount : number = 5;
 
         constructor( private _http : ng.IHttpService, private _window : ng.IWindowService ) {
+
             if( _window.location.hash && _window.parent )
             {
                 const hash : string = _window.location.hash.substr( 1 );
@@ -50,21 +55,18 @@ module PricklyThistle.Auth {
 
                 _window.close();
             }
-            this._serviceId = ++OAuthService.instanceCount;
         }
 
         //  Private variables
 
-        //Todo - handle mulitple concurrent requests
-        private _pendingRequest : IRequestDetails;
-
-        private _serviceId : number;
+        private _pendingRequests : { [ state : string ] : IRequestDetails } = {};
 
         //  Public Functions
 
         authorise( requestDetails : IRequestDetails )
         {
-            this._pendingRequest = requestDetails;
+            const state : string = this.generateState();
+            this._pendingRequests[ state ] = requestDetails;
 
             ( <any>window ).handleAccessTokenResult = ( result : IAccessTokenResponse ) => this.handleAccessTokenResult( result );
             ( <any>window ).handleAccessTokenDenied = ( result : any ) => this.handleAccessTokenDenied( result );
@@ -72,9 +74,9 @@ module PricklyThistle.Auth {
             var url : string = requestDetails.requestUrl;
             url += "&client_id=" + requestDetails.client_id;
             url += "&redirect_uri=" + requestDetails.redirect_uri;
-            url += "&state=" + OAuthService.randomString();
+            url += "&state=" + state;
 
-            console.log( "Making request to " + requestDetails.requestUrl + " (" + this._serviceId + ")" );
+            console.log( "Making request to " + requestDetails.requestUrl + " (" + state + ")" );
 
             this._window.open( url, "_blank", "width=500,height=600" );
         }
@@ -82,29 +84,45 @@ module PricklyThistle.Auth {
         //  Private Functions
 
         private handleAccessTokenResult( results : IAccessTokenResponse ) : void {
-            console.log( "access token result received (" + this._serviceId + ")" );
+            console.log( "access token result received for " + results.state );
 
-            var url : string = this._pendingRequest.validationUrl;
+            const request : IRequestDetails = this._pendingRequests[ results.state ];
+
+            var url : string = request.validationUrl;
             url += "?access_token=" + results.access_token;
 
             this._http.get<ITokenValidationResult>( url ).then(
-                ( result ) => this.handleValidToken( result ),
-                ( error ) => this.handleTokenInvalid( error )
+                ( result ) => this.handleValidToken( result, results.state ),
+                ( error ) => this.handleTokenInvalid( error, results.state )
             );
         }
 
         //TODO: pass this back to controller so we can inform user
-        private handleAccessTokenDenied( result : any ) : void
+        private handleAccessTokenDenied( error : IResponse ) : void
         {
+            const request : IRequestDetails = this.cleaUpStateAndGetRequest( error.state );
+
             console.log( "access token result denied" );
         }
 
-        private handleValidToken( result : IHttpPromiseCallbackArg<ITokenValidationResult> ) : void{
+        private handleValidToken( result : IHttpPromiseCallbackArg<ITokenValidationResult>, state : string ) : void {
             console.log( "token valid ");
+
+            const request : IRequestDetails = this.cleaUpStateAndGetRequest( state );
         }
 
-        private handleTokenInvalid( error : IHttpPromiseCallback<any> ) : void {
+        private handleTokenInvalid( error : IHttpPromiseCallback<any>, state : string ) : void {
             console.log( "token not valid" );
+
+            const request : IRequestDetails = this.cleaUpStateAndGetRequest( state );
+        }
+
+        private cleaUpStateAndGetRequest( state : string ) : IRequestDetails
+        {
+            const request : IRequestDetails = this._pendingRequests[ state ];
+            delete this._pendingRequests[ state ];
+
+            return request;
         }
 
         private static processAccessTokenResult( hash : string ) : any
@@ -120,7 +138,20 @@ module PricklyThistle.Auth {
             return allParameters;
         }
 
+        private generateState() : string
+        {
+            var state : string = OAuthService.randomString(16);
+
+            while( this._pendingRequests[ state ] !== undefined )
+            {
+                state = OAuthService.randomString(16)
+            }
+
+            return state;
+        }
+
         private static randomString( stringLength : number = 8 ) {
+
             const chars : string = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
 
             var randomString : string = '';
