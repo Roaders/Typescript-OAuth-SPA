@@ -15,3 +15,4 @@ compileApp
 ```
 
 The Google implementation is based off the instructions here:
+https://developers.google.com/identity/protocols/OAuth2UserAgent
