@@ -1,0 +1,23 @@
+
+button.google {
+    border: none;
+    background: no-repeat url( "../assets/Google/btn_google_signin_dark_normal_web.png" ) 0 0;
+    width: 191px;
+    height:46px;
+
+    font-size: 0px;
+    line-height: 0;
+    display: block;
+}
+
+button.google:focus {
+    background: no-repeat url( "../assets/Google/btn_google_signin_dark_focus_web.png" ) 0 0;
+}
+
+button.google:disabled {
+    background: no-repeat url( "../assets/Google/btn_google_signin_dark_disabled_web.png" ) 0 0;
+}
+
+button.google:active {
+    background: no-repeat url( "../assets/Google/btn_google_signin_dark_pressed_web.png" ) 0 0;
+}
