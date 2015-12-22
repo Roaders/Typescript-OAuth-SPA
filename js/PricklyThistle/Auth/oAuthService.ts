@@ -45,11 +45,13 @@ module PricklyThistle.Auth {
 
     export class OAuthService implements IOAuthService{
 
-        static $inject = [ "$http", "$window" ];
+        static $inject = [ "$http", "$window", "$rootScope" ];
 
-        static instanceCount : number = 5;
-
-        constructor( private _http : ng.IHttpService, private _window : ng.IWindowService ) {
+        constructor(
+            private _http : ng.IHttpService,
+            private _window : ng.IWindowService,
+            private _scope : ng.IRootScopeService
+        ) {
 
             if( _window.location.hash && _window.parent )
             {
@@ -121,8 +123,10 @@ module PricklyThistle.Auth {
 
             console.log( "access token result denied" );
 
-            request.observable.onError( "access token denied" );
-            request.observable.onCompleted();
+            this._scope.$apply( () => {
+                request.observable.onError( "access token denied" );
+                request.observable.onCompleted();
+            } );
         }
 
         private handleValidToken( result : IHttpPromiseCallbackArg<ITokenValidationResult>, state : string ) : void {
