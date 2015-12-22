@@ -45,11 +45,15 @@ module PricklyThistle.Auth {
 
     export class OAuthService implements IOAuthService{
 
-        static $inject = [ "$http", "$window" ];
+        static $inject = [ "$http", "$window", "$timeout" ];
 
         static instanceCount : number = 5;
 
-        constructor( private _http : ng.IHttpService, private _window : ng.IWindowService ) {
+        constructor(
+            private _http : ng.IHttpService,
+            private _window : ng.IWindowService,
+            private _timeout : ng.ITimeoutService
+        ) {
 
             if( _window.location.hash && _window.parent )
             {
@@ -121,8 +125,7 @@ module PricklyThistle.Auth {
 
             console.log( "access token result denied" );
 
-            request.observable.onError( "access token denied" );
-            request.observable.onCompleted();
+            this._timeout( () => OAuthService.returnError( request, "access token denied" ), 0 );
         }
 
         private handleValidToken( result : IHttpPromiseCallbackArg<ITokenValidationResult>, state : string ) : void {
@@ -132,15 +135,14 @@ module PricklyThistle.Auth {
 
             if( result.data.aud == request.originalRequest.client_id )
             {
-                request.observable.onNext( request.access_token );
+                this._timeout( () => OAuthService.returnSuccess( request, request.access_token ), 0 );
             }
             else
             {
                 console.log( "Returned aud: " + result.data.aud + " does not equal expected client id: " + request.originalRequest.client_id );
-                request.observable.onError( "returned audience does not match client id" );
-            }
 
-            request.observable.onCompleted();
+                this._timeout( () => OAuthService.returnError( request, "returned audience does not match client id" ), 0 );
+            }
         }
 
         private handleTokenInvalid( error : IHttpPromiseCallback<any>, state : string ) : void {
@@ -148,7 +150,18 @@ module PricklyThistle.Auth {
 
             const request : IPendingRequest = this.cleaUpStateAndGetRequest( state );
 
-            request.observable.onError( "token not valid" );
+            this._timeout( () => OAuthService.returnError( request, "token not valid" ), 0 );
+        }
+
+        private static returnSuccess( request : IPendingRequest, result : string ) : void {
+
+            request.observable.onNext( result );
+            request.observable.onCompleted();
+        }
+
+        private static returnError( request : IPendingRequest, error : string ) : void {
+
+            request.observable.onError( error );
             request.observable.onCompleted();
         }
 
