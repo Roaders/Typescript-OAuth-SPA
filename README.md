@@ -14,5 +14,12 @@ compileApp
 #(this will use node to compile the typescript files to javascript)
 ```
 
+At the moment you will have to have typescript and tsd installed globally for this script to work:
+
+```bash
+npm install tyepscript -g
+npm install tsd -g
+```
+
 The Google implementation is based off the instructions here:
 https://developers.google.com/identity/protocols/OAuth2UserAgent
