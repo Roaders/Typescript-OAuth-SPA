@@ -6,7 +6,7 @@ import ExampleController = PricklyThistle.Example.ExampleController;
 import OAuthService = PricklyThistle.Auth.OAuthService;
 import IInjectorService = ng.auto.IInjectorService;
 
-const module : ng.IModule = angular.module( 'oAuthClient', [] );
+const module : ng.IModule = angular.module( 'oAuthClient', [ 'rx' ] );
 
 module.factory( "OAuthService", ( $injector : IInjectorService ) => { return $injector.instantiate( OAuthService ) });
 
