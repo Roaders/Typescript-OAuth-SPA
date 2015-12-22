@@ -1,6 +1,8 @@
 /**
- * Created by Giles on 19/12/2015.
+ * Created by Giles Roadnight on 19/12/2015.
  */
+
+/// <reference path="../../../typings/rx/rx.d.ts" />
 
 module PricklyThistle.Auth {
 
@@ -12,6 +14,12 @@ module PricklyThistle.Auth {
         redirect_uri : string,
         requestUrl : string,
         validationUrl : string
+    }
+
+    interface IPendingRequest {
+        originalRequest : IRequestDetails,
+        observable : Rx.Subject<string>,
+        access_token ?: string
     }
 
     interface IResponse {
@@ -31,13 +39,19 @@ module PricklyThistle.Auth {
         access_type : string
     }
 
-    export class OAuthService {
+    export interface IOAuthService {
+        authorise( requestDetails : IRequestDetails ) : Rx.Observable<string>;
+    }
 
-        static $inject = [ "$http", "$window" ];
+    export class OAuthService implements IOAuthService{
 
-        static instanceCount : number = 5;
+        static $inject = [ "$http", "$window", "$rootScope" ];
 
-        constructor( private _http : ng.IHttpService, private _window : ng.IWindowService ) {
+        constructor(
+            private _http : ng.IHttpService,
+            private _window : ng.IWindowService,
+            private _scope : ng.IRootScopeService
+        ) {
 
             if( _window.location.hash && _window.parent )
             {
@@ -59,14 +73,13 @@ module PricklyThistle.Auth {
 
         //  Private variables
 
-        private _pendingRequests : { [ state : string ] : IRequestDetails } = {};
+        private _pendingRequests : { [ state : string ] : IPendingRequest } = {};
 
         //  Public Functions
 
-        authorise( requestDetails : IRequestDetails )
+        authorise( requestDetails : IRequestDetails ) : Rx.Observable<string>
         {
             const state : string = this.generateState();
-            this._pendingRequests[ state ] = requestDetails;
 
             ( <any>window ).handleAccessTokenResult = ( result : IAccessTokenResponse ) => this.handleAccessTokenResult( result );
             ( <any>window ).handleAccessTokenDenied = ( result : any ) => this.handleAccessTokenDenied( result );
@@ -79,47 +92,73 @@ module PricklyThistle.Auth {
             console.log( "Making request to " + requestDetails.requestUrl + " (" + state + ")" );
 
             this._window.open( url, "_blank", "width=500,height=600" );
+
+            const observable : Rx.Subject<string> = new Rx.Subject<string>();
+
+            this._pendingRequests[ state ] = { observable: observable, originalRequest: requestDetails };
+
+            return observable;
         }
 
         //  Private Functions
 
-        private handleAccessTokenResult( results : IAccessTokenResponse ) : void {
-            console.log( "access token result received for " + results.state );
+        private handleAccessTokenResult( accessTokenResult : IAccessTokenResponse ) : void {
+            console.log( "access token result received for " + accessTokenResult.state );
 
-            const request : IRequestDetails = this._pendingRequests[ results.state ];
+            const request : IPendingRequest = this._pendingRequests[ accessTokenResult.state ];
+            request.access_token = accessTokenResult.access_token;
 
-            var url : string = request.validationUrl;
-            url += "?access_token=" + results.access_token;
+            var url : string = request.originalRequest.validationUrl;
+            url += "?access_token=" + accessTokenResult.access_token;
 
             this._http.get<ITokenValidationResult>( url ).then(
-                ( result ) => this.handleValidToken( result, results.state ),
-                ( error ) => this.handleTokenInvalid( error, results.state )
+                ( validationResult ) => this.handleValidToken( validationResult, accessTokenResult.state ),
+                ( error ) => this.handleTokenInvalid( error, accessTokenResult.state )
             );
         }
 
-        //TODO: pass this back to controller so we can inform user
         private handleAccessTokenDenied( error : IResponse ) : void
         {
-            const request : IRequestDetails = this.cleaUpStateAndGetRequest( error.state );
+            const request : IPendingRequest = this.cleaUpStateAndGetRequest( error.state );
 
             console.log( "access token result denied" );
+
+            this._scope.$apply( () => {
+                request.observable.onError( "access token denied" );
+                request.observable.onCompleted();
+            } );
         }
 
         private handleValidToken( result : IHttpPromiseCallbackArg<ITokenValidationResult>, state : string ) : void {
             console.log( "token valid ");
 
-            const request : IRequestDetails = this.cleaUpStateAndGetRequest( state );
+            const request : IPendingRequest = this.cleaUpStateAndGetRequest( state );
+
+            if( result.data.aud == request.originalRequest.client_id )
+            {
+                request.observable.onNext( request.access_token );
+            }
+            else
+            {
+                console.log( "Returned aud: " + result.data.aud + " does not equal expected client id: " + request.originalRequest.client_id );
+                request.observable.onError( "returned audience does not match client id" );
+            }
+
+            request.observable.onCompleted();
         }
 
         private handleTokenInvalid( error : IHttpPromiseCallback<any>, state : string ) : void {
             console.log( "token not valid" );
 
-            const request : IRequestDetails = this.cleaUpStateAndGetRequest( state );
+            const request : IPendingRequest = this.cleaUpStateAndGetRequest( state );
+
+            request.observable.onError( "token not valid" );
+            request.observable.onCompleted();
         }
 
-        private cleaUpStateAndGetRequest( state : string ) : IRequestDetails
+        private cleaUpStateAndGetRequest( state : string ) : IPendingRequest
         {
-            const request : IRequestDetails = this._pendingRequests[ state ];
+            const request : IPendingRequest = this._pendingRequests[ state ];
             delete this._pendingRequests[ state ];
 
             return request;
