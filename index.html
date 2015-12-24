@@ -19,7 +19,11 @@
 
     <H2>Google</H2>
 
-    <button class="google" ng-click="controller.authenticate()"></button>
+    <button
+            class="google"
+            ng-click="controller.authenticate()"
+            ng-disabled="!controller.signInEnabled"
+    ></button>
 
     <div>{{controller.message}}</div>
 

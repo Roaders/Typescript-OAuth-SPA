@@ -8,18 +8,20 @@ module PricklyThistle.Auth {
 
     import IHttpPromiseCallback = angular.IHttpPromiseCallback;
     import IHttpPromiseCallbackArg = angular.IHttpPromiseCallbackArg;
+    import IPromise = angular.IPromise;
 
     export interface IRequestDetails {
-        client_id : string,
-        redirect_uri : string,
-        requestUrl : string,
-        validationUrl : string
+        client_id: string,
+        redirect_uri: string,
+        requestUrl: string,
+        validationUrl: string
     }
 
     interface IPendingRequest {
         originalRequest : IRequestDetails,
         observable : Rx.Subject<string>,
-        access_token ?: string
+        access_token ?: string,
+        window?: Window
     }
 
     interface IResponse {
@@ -45,12 +47,13 @@ module PricklyThistle.Auth {
 
     export class OAuthService implements IOAuthService{
 
-        static $inject = [ "$http", "$window", "$rootScope" ];
+        static $inject = [ "$http", "$window", "$rootScope", "$interval" ];
 
         constructor(
             private _http : ng.IHttpService,
             private _window : ng.IWindowService,
-            private _scope : ng.IRootScopeService
+            private _scope : ng.IRootScopeService,
+            private _interval : ng.IIntervalService
         ) {
 
             if( _window.location.hash && _window.parent )
@@ -75,6 +78,8 @@ module PricklyThistle.Auth {
 
         private _pendingRequests : { [ state : string ] : IPendingRequest } = {};
 
+        private _checkWindowClosedIntervalPromise : IPromise<any>;
+
         //  Public Functions
 
         authorise( requestDetails : IRequestDetails ) : Rx.Observable<string>
@@ -91,22 +96,60 @@ module PricklyThistle.Auth {
 
             console.log( "Making request to " + requestDetails.requestUrl + " (" + state + ")" );
 
-            this._window.open( url, "_blank", "width=500,height=600" );
+            const popup : Window = this._window.open( url, "_blank", "width=500,height=600" );
 
             const observable : Rx.Subject<string> = new Rx.Subject<string>();
 
-            this._pendingRequests[ state ] = { observable: observable, originalRequest: requestDetails };
+            this._pendingRequests[ state ] = {
+                observable: observable,
+                originalRequest: requestDetails,
+                window: popup
+            };
+
+            if( !this._checkWindowClosedIntervalPromise )
+            {
+                this._checkWindowClosedIntervalPromise = this._interval( () => this.checkWindows(), 500 );
+            }
 
             return observable;
         }
 
         //  Private Functions
 
+        private checkWindows() : void {
+            var windowsOpen: boolean;
+
+            for( var state in this._pendingRequests ) {
+                if( this._pendingRequests.hasOwnProperty( state ) ){
+                    const request: IPendingRequest = this._pendingRequests[ state ];
+
+                    if( request.window )
+                    {
+                        if( request.window.closed )
+                        {
+                            this.sendErrorResult( state, "user closed authorisation window" );
+                        }
+                        else
+                        {
+                            windowsOpen = true;
+                        }
+                    }
+                }
+            }
+
+            if( !windowsOpen )
+            {
+                this._interval.cancel( this._checkWindowClosedIntervalPromise );
+                this._checkWindowClosedIntervalPromise = null;
+            }
+        }
+
         private handleAccessTokenResult( accessTokenResult : IAccessTokenResponse ) : void {
             console.log( "access token result received for " + accessTokenResult.state );
 
             const request : IPendingRequest = this._pendingRequests[ accessTokenResult.state ];
             request.access_token = accessTokenResult.access_token;
+            request.window = null;
 
             var url : string = request.originalRequest.validationUrl;
             url += "?access_token=" + accessTokenResult.access_token;
@@ -119,14 +162,27 @@ module PricklyThistle.Auth {
 
         private handleAccessTokenDenied( error : IResponse ) : void
         {
-            const request : IPendingRequest = this.cleaUpStateAndGetRequest( error.state );
+            this.sendErrorResult( error.state, "access token permission denied" );
+        }
 
-            console.log( "access token result denied" );
+        private sendErrorResult( state: string, message: string ) : void {
+            const request : IPendingRequest = this.cleaUpStateAndGetRequest( state );
 
-            this._scope.$apply( () => {
-                request.observable.onError( "access token denied" );
+            console.log( message );
+
+            if( !this._scope.$$phase )
+            {
+                this._scope.$apply( () => {
+                    request.observable.onError( message );
+                    request.observable.onCompleted();
+                } );
+
+            }
+            else
+            {
+                request.observable.onError( message );
                 request.observable.onCompleted();
-            } );
+            }
         }
 
         private handleValidToken( result : IHttpPromiseCallbackArg<ITokenValidationResult>, state : string ) : void {
