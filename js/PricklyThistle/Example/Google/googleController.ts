@@ -61,14 +61,14 @@ module PricklyThistle.Example.Google {
         }
 
         getTokenInfo() : void {
-            this._googleService.tokenInfo().subscribe(
+            this._googleService.tokenInfo().then(
                 ( result ) => { this.handleTokenInfo( result ) },
                 ( fault : string ) => this.handleError( fault )
             )
         }
 
         getUserInfo() : void {
-            this._googleService.userInfo().subscribe(
+            this._googleService.userInfo().then(
                 ( result ) => { this.handleUserInfo( result ) },
                 ( fault : string ) => this.handleError( fault )
             )
