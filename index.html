@@ -15,7 +15,7 @@
 </head>
 <body>
 
-<div ng-controller="exampleController as controller">
+<div ng-controller="googleController as controller">
 
     <H2>Google</H2>
 
@@ -25,7 +25,37 @@
             ng-disabled="!controller.signInEnabled"
     ></button>
 
-    <div>{{controller.message}}</div>
+    <div ng-if="controller.message">{{controller.message}}</div>
+
+    <H3>Token Info:</H3>
+
+    <div>
+        <textarea
+                rows="5" cols="100"
+                disabled>{{controller.tokenInfoOutput}}</textarea>
+    </div>
+    <div>
+        <button ng-click="controller.getTokenInfo()">Refresh</button>
+    </div>
+
+    <H3>User Info:</H3>
+    <div>
+        <textarea
+                rows="3" cols="100"
+                disabled>{{controller.userInfoOutput}}</textarea>
+    </div>
+
+    <div>
+        <img
+                width="150"
+                height="150"
+                ng-if="controller.profilePicUrl"
+                src="{{controller.profilePicUrl}}"
+        />
+
+
+        <button ng-click="controller.getUserInfo()">Refresh</button>
+    </div>
 
 </div>
 

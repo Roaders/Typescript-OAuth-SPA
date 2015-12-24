@@ -34,10 +34,10 @@ module PricklyThistle.Auth {
         token_type : string
     }
 
-    interface ITokenValidationResult{
+    export interface ITokenInfo{
         aud : string,
         scope : string,
-        expired_in : string,
+        expires_in : string,
         access_type : string
     }
 
@@ -47,7 +47,11 @@ module PricklyThistle.Auth {
 
     export class OAuthService implements IOAuthService{
 
+        //  Statics
+
         static $inject = [ "$http", "$window", "$rootScope", "$interval" ];
+
+        //  Constructor
 
         constructor(
             private _http : ng.IHttpService,
@@ -154,7 +158,7 @@ module PricklyThistle.Auth {
             var url : string = request.originalRequest.validationUrl;
             url += "?access_token=" + accessTokenResult.access_token;
 
-            this._http.get<ITokenValidationResult>( url ).then(
+            this._http.get<ITokenInfo>( url ).then(
                 ( validationResult ) => this.handleValidToken( validationResult, accessTokenResult.state ),
                 ( error ) => this.handleTokenInvalid( error, accessTokenResult.state )
             );
@@ -185,7 +189,7 @@ module PricklyThistle.Auth {
             }
         }
 
-        private handleValidToken( result : IHttpPromiseCallbackArg<ITokenValidationResult>, state : string ) : void {
+        private handleValidToken(result : IHttpPromiseCallbackArg<ITokenInfo>, state : string ) : void {
             console.log( "token valid ");
 
             const request : IPendingRequest = this.cleaUpStateAndGetRequest( state );
