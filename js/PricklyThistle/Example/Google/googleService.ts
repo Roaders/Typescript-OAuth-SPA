@@ -10,6 +10,7 @@ module PricklyThistle.Example.Google {
     import IOAuthService = PricklyThistle.Auth.IOAuthService;
     import ITokenValidationResult = PricklyThistle.Auth.ITokenInfo;
     import IPromise = Rx.IPromise;
+    import ICookiesService = angular.cookies.ICookiesService;
 
     export interface IUserInfo {
         id: string,
@@ -27,24 +28,36 @@ module PricklyThistle.Example.Google {
     export interface IGoogleService {
         authorise() : Rx.Observable<string>;
         tokenInfo() : IPromise<ITokenValidationResult>;
-        userInfo() : IPromise<IUserInfo>
+        userInfo() : IPromise<IUserInfo>,
+        hasToken(): boolean
     }
 
     export class GoogleService implements IGoogleService {
 
         //  Statics
 
-        static $inject = [ "OAuthService", "$http" ];
+        static $inject = [ "OAuthService", "$http", "$cookies" ];
+        static cookie_Key: string = "googleAuthToken";
 
         //  Constructor
 
-        constructor( private _authService : IOAuthService, private _http : ng.IHttpService ) {}
+        constructor(
+            private _authService : IOAuthService,
+            private _http : ng.IHttpService,
+            private _cookies : ICookiesService
+        ) {
+            this._accessToken = this._cookies.get( GoogleService.cookie_Key );
+        }
 
         //  Private Variables
 
         private _accessToken : string;
 
         //  Public Functions
+
+        hasToken(): boolean{
+            return this._accessToken != null;
+        }
 
         authorise(): Rx.Observable<string> {
             return this._authService.authorise( Google.authDetails ).do(
@@ -69,6 +82,7 @@ module PricklyThistle.Example.Google {
         private handleAccessTokenResult( accessToken : string ) : void
         {
             this._accessToken = accessToken;
+            this._cookies.put( GoogleService.cookie_Key, accessToken );
         }
     }
 

@@ -8,6 +8,7 @@
     <link href="css/styles.css" rel="stylesheet">
 
     <script src="node_modules/angular/angular.js"></script>
+    <script src="node_modules/angular-cookies/angular-cookies.js"></script>
     <script src="node_modules/rx/dist/rx.all.js"></script>
 
     <script src="js/app.js"></script>
@@ -15,47 +16,57 @@
 </head>
 <body>
 
-<div ng-controller="googleController as controller">
+<div class="centralPane">
 
-    <H2>Google</H2>
+    <div ng-controller="googleController as controller" class="hasBorder">
 
-    <button
-            class="google"
-            ng-click="controller.authenticate()"
-            ng-disabled="!controller.signInEnabled"
-    ></button>
+        <div>
+            <div class="inline">
+                <H2>Google</H2>
 
-    <div ng-if="controller.message">{{controller.message}}</div>
+                <button
+                        class="google"
+                        ng-click="controller.authenticate()"
+                        ng-disabled="!controller.signInEnabled"
+                ></button>
+            </div>
 
-    <H3>Token Info:</H3>
+            <div class="inline" ng-if="controller.name" >
+                <img
+                        width="100"
+                        height="100"
+                        src="{{controller.profilePicUrl}}"
+                />
 
-    <div>
-        <textarea
-                rows="5" cols="100"
-                disabled>{{controller.tokenInfoOutput}}</textarea>
+                <div class="inline">
+                    <h3>{{controller.name}}</h3>
+                    <a href="mailto:{{controller.email}}">{{controller.email}}</a>
+                </div>
+            </div>
+        </div>
+
+        <div ng-if="controller.message">{{controller.message}}</div>
+
+        <div ng-if="controller.tokenInfoOutput">
+            Show Token Info: <input type="checkbox" ng-model="controller.showTokenInfo" />
+        </div>
+
+        <div ng-if="controller.showTokenInfo">
+            <H3>Token Info:</H3>
+
+            <div>
+                <textarea
+                    rows="5" cols="100"
+                    disabled>{{controller.tokenInfoOutput}}</textarea>
+            </div>
+
+            <div>
+                <button ng-click="controller.getTokenInfo()">Refresh</button>
+            </div>
+        </div>
+
     </div>
-    <div>
-        <button ng-click="controller.getTokenInfo()">Refresh</button>
-    </div>
 
-    <H3>User Info:</H3>
-    <div>
-        <textarea
-                rows="3" cols="100"
-                disabled>{{controller.userInfoOutput}}</textarea>
-    </div>
-
-    <div>
-        <img
-                width="150"
-                height="150"
-                ng-if="controller.profilePicUrl"
-                src="{{controller.profilePicUrl}}"
-        />
-
-
-        <button ng-click="controller.getUserInfo()">Refresh</button>
-    </div>
 
 </div>
 

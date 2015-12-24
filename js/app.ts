@@ -8,7 +8,7 @@ import OAuthService = PricklyThistle.Auth.OAuthService;
 import IInjectorService = ng.auto.IInjectorService;
 import GoogleService = PricklyThistle.Example.Google.GoogleService;
 
-const module : ng.IModule = angular.module( 'oAuthClient', [] );
+const module : ng.IModule = angular.module( 'oAuthClient', [ 'ngCookies' ] );
 
 module.factory( "OAuthService", ( $injector : IInjectorService ) => { return $injector.instantiate( OAuthService ) })
     .factory( "googleService", ( $injector : IInjectorService ) => { return $injector.instantiate( GoogleService ) });

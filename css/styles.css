@@ -21,3 +21,20 @@ button.google:disabled {
 button.google:active {
     background: no-repeat url( "../assets/Google/btn_google_signin_dark_pressed_web.png" ) 0 0;
 }
+
+.hasBorder{
+    border:1px solid black;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+    margin: 10px;
+}
+
+.centralPane {
+    width: 800px;
+    margin: 0px auto;
+}
+
+.inline {
+    display: inline-block;
+}

@@ -14,26 +14,26 @@ module PricklyThistle.Example.Google {
         //  Constructor
 
         constructor( private _googleService : IGoogleService ) {
+            if( this._googleService.hasToken() )
+            {
+                this.handleAuthorisation();
+            }
         }
 
         //  Properties
 
-        private _message : string = "Awaiting authorisation";
+        private _message : string;
 
         get message() : string {
             return this._message;
         }
 
+        showTokenInfo: boolean;
+
         private _tokenInfoOutput : string;
 
         get tokenInfoOutput() : string {
             return this._tokenInfoOutput;
-        }
-
-        private _userInfoOutput : string;
-
-        get userInfoOutput() : string {
-            return this._userInfoOutput;
         }
 
         private _signInEnabled : boolean = true;
@@ -48,6 +48,18 @@ module PricklyThistle.Example.Google {
             return this._profilePicUrl;
         }
 
+        private _name : string;
+
+        get name() : string {
+            return this._name;
+        }
+
+        private _email : string;
+
+        get email() : string {
+            return this._email;
+        }
+
         //  Public Functions
 
         authenticate() : void
@@ -55,7 +67,7 @@ module PricklyThistle.Example.Google {
             this._signInEnabled = false;
 
             this._googleService.authorise().subscribe(
-                ( result : string ) => this.handleAuthorisation( result ),
+                () => this.handleAuthorisation(),
                 ( fault : string ) => this.handleError( fault )
             );
         }
@@ -79,9 +91,8 @@ module PricklyThistle.Example.Google {
         private handleUserInfo( result : IHttpPromiseCallbackArg<IUserInfo> ) : void {
             console.log( "User info received at " + new Date() );
 
-            this._userInfoOutput = "name: " + result.data.given_name + " " + result.data.family_name + "\n";
-            this._userInfoOutput += "email: " + result.data.email + "\n";
-            this._userInfoOutput += "updated at: " + new Date();
+            this._name = result.data.given_name + " " + result.data.family_name;
+            this._email = result.data.email;
 
             this._profilePicUrl = result.data.picture;
         }
@@ -96,7 +107,7 @@ module PricklyThistle.Example.Google {
             this._tokenInfoOutput += "updated at: " + new Date();
         }
 
-        private handleAuthorisation( result : string ) : void {
+        private handleAuthorisation() : void {
             this._signInEnabled = true;
             this._message = undefined;
 
@@ -108,9 +119,12 @@ module PricklyThistle.Example.Google {
             this._signInEnabled = true;
             this._message = fault;
 
-            this._userInfoOutput = null;
             this._tokenInfoOutput = null;
+            this.showTokenInfo = false;
+
             this._profilePicUrl = null;
+            this._name = null;
+            this._email = null;
         }
 
     }
