@@ -17,8 +17,6 @@ module.controller( "googleController", GoogleController );
 
 module.run( ["$rootScope", ( $rootScope ) => {
 
-    //PricklyThistle.Schedulers.onNgReady( $rootScope );
-
     new Rx.ScopeScheduler( $rootScope );
 
 }]);
