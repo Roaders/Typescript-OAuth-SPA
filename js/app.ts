@@ -14,3 +14,11 @@ module.factory( "OAuthService", ( $injector : IInjectorService ) => { return $in
     .factory( "googleService", ( $injector : IInjectorService ) => { return $injector.instantiate( GoogleService ) });
 
 module.controller( "googleController", GoogleController );
+
+module.run( ["$rootScope", ( $rootScope ) => {
+
+    //PricklyThistle.Schedulers.onNgReady( $rootScope );
+
+    new Rx.ScopeScheduler( $rootScope );
+
+}]);

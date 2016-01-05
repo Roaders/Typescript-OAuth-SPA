@@ -8,7 +8,8 @@
   "dependencies": {
     "angular": "^1.4.8",
     "bootstrap": "^3.3.6",
-    "rx": "4.0.7",
+    "rx": "2.2.28",
+    "rx-angular": "0.0.14",
     "tsd": "^0.6.5",
     "typescript": "1.6.2"
   }
