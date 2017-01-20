@@ -9,8 +9,8 @@
     "angular": "^1.4.8",
     "angular-cookies": "^1.4.8",
     "bootstrap": "^3.3.6",
-    "rx": "4.0.7",
+    "rx": "4.1.0",
     "tsd": "^0.6.5",
-    "typescript": "1.6.2"
+    "typescript": "2.1.5"
   }
 }
