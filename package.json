@@ -6,7 +6,7 @@
   "author": "Giles Roadnight",
   "license": "ISC",
   "dependencies": {
-    "angular": "^1.4.8",
+    "angular": "^1.6.2",
     "angular-cookies": "^1.4.8",
     "bootstrap": "^3.3.6",
     "rx": "4.1.0",
