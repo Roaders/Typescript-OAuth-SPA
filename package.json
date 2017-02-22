@@ -11,7 +11,7 @@
     "bootstrap": "^3.3.6",
     "rx": "4.1.0",
     "tsd": "^0.6.5",
-    "typescript": "2.1.5",
+    "typescript": "2.2.1",
     "snyk": "^1.24.5"
   },
   "scripts": {
