@@ -12,11 +12,12 @@
     "rx": "4.1.0",
     "tsd": "^0.6.5",
     "typescript": "2.1.5",
-    "snyk": "^1.24.5"
+    "snyk": "^1.83.0"
   },
   "scripts": {
     "snyk-protect": "snyk protect",
-    "prepublish": "npm run snyk-protect"
+    "prepublish": "npm run snyk-protect",
+    "prepare": "npm run snyk-protect"
   },
   "snyk": true
 }

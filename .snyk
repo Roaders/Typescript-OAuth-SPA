@@ -1,5 +1,5 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.7.0
+version: v1.12.0
 ignore: {}
 # patches apply the minimum changes required to fix a vulnerability
 patch:
@@ -8,3 +8,12 @@ patch:
         patched: '2017-01-23T07:53:51.210Z'
     - tsd > glob > minimatch:
         patched: '2017-01-23T07:53:51.210Z'
+  'npm:hoek:20180212':
+    - tsd > definition-header > joi > hoek:
+        patched: '2018-06-22T08:12:04.745Z'
+    - tsd > definition-header > joi > topo > hoek:
+        patched: '2018-06-22T08:12:04.745Z'
+    - tsd > joi > hoek:
+        patched: '2018-06-22T08:12:04.745Z'
+    - tsd > joi > topo > hoek:
+        patched: '2018-06-22T08:12:04.745Z'
