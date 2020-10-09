@@ -10,7 +10,7 @@
     "angular-cookies": "^1.4.8",
     "bootstrap": "^3.3.6",
     "rx": "4.1.0",
-    "tsd": "^0.6.5",
+    "tsd": "^0.7.0",
     "typescript": "2.1.5",
     "snyk": "^1.24.5"
   },
